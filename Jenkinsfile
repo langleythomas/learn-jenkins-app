@@ -104,7 +104,7 @@
         }
 
         environment {
-          CI_ENVIRONMENT_URL = "PUT YOUR NETLIFY SITE URL HERE"
+          CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app/"
         }
 
         steps {
