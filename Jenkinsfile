@@ -52,7 +52,7 @@ pipeline {
           }
           post {
             always {
-              junit "jest-results/junit.xml"
+              junit "test-results/junit.xml"
             }
           }
         }
@@ -92,7 +92,7 @@ pipeline {
       }
 
       environment {
-        CI_ENVIRONMENT_URL = "STAGING_URL_TO_BE_SET"
+        CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
       }
 
       steps {
