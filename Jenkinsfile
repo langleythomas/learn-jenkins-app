@@ -94,7 +94,16 @@
         }
       }
 
-      stage("Deploy Prog") {
+      stage("Approval") {
+        steps {
+          script {
+            input message: 'Do you wish to deploy to production?',
+                  ok: 'Yes, I am sure!'
+          }
+        }
+      }
+
+      stage("Deploy Prod") {
         agent {
           docker {
             image "node:18-alpine"
