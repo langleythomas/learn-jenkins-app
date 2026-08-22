@@ -15,24 +15,24 @@ pipeline {
       }
     }
 
-    stage("Build Microservice") {
-      agent {
-        docker {
-          image "node:18-alpine"
-          reuseNode true
-        }
-      }
-      steps {
-        sh """
-          ls -la
-          node --version
-          npm --version
-          npm ci
-          npm run build
-          ls -la
-        """
-      }
-    }
+    // stage("Build Microservice") {
+    //   agent {
+    //     docker {
+    //       image "node:18-alpine"
+    //       reuseNode true
+    //     }
+    //   }
+    //   steps {
+    //     sh """
+    //       ls -la
+    //       node --version
+    //       npm --version
+    //       npm ci
+    //       npm run build
+    //       ls -la
+    //     """
+    //   }
+    // }
 
     stage("Tests") {
       parallel {
@@ -58,36 +58,36 @@ pipeline {
       }
     }
 
-    // stage("Deploy Staging") {
-    //   agent {
-    //     docker {
-    //       image "my-playwright"
-    //       reuseNode true
-    //     }
-    //   }
+    stage("Deploy Staging") {
+      agent {
+        docker {
+          image "my-playwright"
+          reuseNode true
+        }
+      }
 
-    //   // environment {
-    //   //   CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
-    //   // }
+      environment {
+        CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
+      }
 
-    //   steps {
-    //     sh """
-    //       netlify --version
-    //       echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
-    //       netlify status
-    //       netlify deploy --dir=build --json > deploy-output.json
-    //       CI_ENVIRONMENT_URL=\$(node-jq -r ".deploy_url" deploy-output.json)
-    //       echo "${CI_ENVIRONMENT_URL}"
-    //       # npx playwright test --reporter=html
-    //     """
-    //   }
+      steps {
+        sh """
+          netlify --version
+          echo "Deploying to staging. Site ID: $NETLIFY_SITE_ID"
+          netlify status
+          netlify deploy --dir=build --json > deploy-output.json
+          CI_ENVIRONMENT_URL=\$(node-jq -r ".deploy_url" deploy-output.json)
+          echo "${CI_ENVIRONMENT_URL}"
+          # npx playwright test --reporter=html
+        """
+      }
 
-    //   // post {
-    //   //   always {
-    //   //     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Staging E2E", reportTitles: "", useWrapperFileDirectly: true])
-    //   //   }
-    //   // }
-    // }
+      // post {
+      //   always {
+      //     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Staging E2E", reportTitles: "", useWrapperFileDirectly: true])
+      //   }
+      // }
+    }
 
     // stage('Staging E2E') {
     //   agent {
