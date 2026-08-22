@@ -78,15 +78,15 @@ pipeline {
           netlify deploy --dir=build --json > deploy-output.json
           CI_ENVIRONMENT_URL=\$(node-jq -r ".deploy_url" deploy-output.json)
           echo "${CI_ENVIRONMENT_URL}"
-          # npx playwright test --reporter=html
+          npx playwright test --reporter=html
         """
       }
 
-      // post {
-      //   always {
-      //     publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Staging E2E", reportTitles: "", useWrapperFileDirectly: true])
-      //   }
-      // }
+      post {
+        always {
+          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Staging E2E", reportTitles: "", useWrapperFileDirectly: true])
+        }
+      }
     }
 
     // stage('Staging E2E') {
