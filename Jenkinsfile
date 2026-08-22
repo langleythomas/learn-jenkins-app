@@ -15,24 +15,24 @@ pipeline {
       }
     }
 
-    // stage("Build Microservice") {
-    //   agent {
-    //     docker {
-    //       image "node:18-alpine"
-    //       reuseNode true
-    //     }
-    //   }
-    //   steps {
-    //     sh """
-    //       ls -la
-    //       node --version
-    //       npm --version
-    //       npm ci
-    //       npm run build
-    //       ls -la
-    //     """
-    //   }
-    // }
+    stage("Build Microservice") {
+      agent {
+        docker {
+          image "node:18-alpine"
+          reuseNode true
+        }
+      }
+      steps {
+        sh """
+          ls -la
+          node --version
+          npm --version
+          npm ci
+          npm run build
+          ls -la
+        """
+      }
+    }
 
     stage("Tests") {
       parallel {
@@ -114,47 +114,47 @@ pipeline {
     //   }
     // }
 
-    // stage("Approval") {
-    //   options {
-    //     timeout(time: 15, unit: "MINUTES")
-    //   }
-    //   steps {
-    //     script {
-    //       input message: "Do you wish to deploy to production?",
-    //             ok: "Yes, I am sure!"
-    //     }
-    //   }
-    // }
+    stage("Approval") {
+      options {
+        timeout(time: 15, unit: "MINUTES")
+      }
+      steps {
+        script {
+          input message: "Do you wish to deploy to production?",
+                ok: "Yes, I am sure!"
+        }
+      }
+    }
 
-    // stage("Deploy Prod") {
-    //   agent {
-    //     docker {
-    //       image "my-playwright"
-    //       reuseNode true
-    //     }
-    //   }
+    stage("Deploy Prod") {
+      agent {
+        docker {
+          image "my-playwright"
+          reuseNode true
+        }
+      }
 
-    //   environment {
-    //     CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
-    //   }
+      environment {
+        CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
+      }
 
-    //   steps {
-    //     sh """
-    //       node --version
-    //       netlify --version
-    //       echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-    //       netlify status
-    //       netlify deploy --dir=build --prod
-    //       npx playwright test  --reporter=html
-    //     """
-    //   }
+      steps {
+        sh """
+          node --version
+          netlify --version
+          echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+          netlify status
+          netlify deploy --dir=build --prod
+          npx playwright test  --reporter=html
+        """
+      }
 
-    //   post {
-    //     always {
-    //       publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Prod E2E", reportTitles: "", useWrapperFileDirectly: true])
-    //     }
-    //   }
-    // }
+      post {
+        always {
+          publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Prod E2E", reportTitles: "", useWrapperFileDirectly: true])
+        }
+      }
+    }
 
     // stage("Prod E2E") {
     //   agent {
