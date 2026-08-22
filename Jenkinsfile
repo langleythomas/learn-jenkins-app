@@ -96,25 +96,12 @@
 
       stage("Approval") {
         options {
-            timeout(time: 15, unit: "MINUTES")
+          timeout(time: 15, unit: "MINUTES")
         }
         steps {
           script {
-            def userInput = input(
-              message: "Do you wish to deploy to production?",
-              ok: "Yes, I am sure!",
-              parameters: [
-                choice(
-                  name: "PROCEED",
-                  choices: ["Yes", "No"],
-                  description: "Select No to cancel the deployment"
-                )
-              ]
-            )
-
-            if (userInput == "No") {
-              error("Deployment aborted by user.")
-            }
+            input message: "Do you wish to deploy to production?",
+                  ok: "Yes, I am sure!"
           }
         }
       }
