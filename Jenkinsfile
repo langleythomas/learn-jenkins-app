@@ -94,6 +94,24 @@
       //   }
       // }
 
+      // stage("Deploy Staging") {
+      //   agent {
+      //     docker {
+      //       image "node:18-alpine"
+      //       reuseNode true
+      //     }
+      //   }
+      //   steps {
+      //     sh """
+      //       npm install netlify-cli
+      //       node_modules/.bin/netlify --version
+      //       echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
+      //       node_modules/.bin/netlify status
+      //       node_modules/.bin/netlify deploy --dir=build --no-build
+      //     """
+      //   }
+      // }
+
       stage("Deploy Staging") {
         agent {
           docker {
@@ -104,13 +122,40 @@
         steps {
           sh """
             npm install netlify-cli
-            node_modules/.bin/netlify --version
-            echo "Deploying to production. Site ID: $NETLIFY_SITE_ID"
-            node_modules/.bin/netlify status
-            node_modules/.bin/netlify deploy --dir=build --no-build
+            
+            # Execute deployment, parse JSON output, and save URL
+            DEPLOY_OUTPUT=\$(node_modules/.bin/netlify deploy --dir=build --no-build --json)
+            echo "\$DEPLOY_OUTPUT" | node -e 'console.log(JSON.parse(require("fs").readFileSync(0, "utf-8")).deploy_url)' > staging_url.txt
+            
+            echo "Staging URL saved: \$(cat staging_url.txt)"
           """
         }
       }
+
+      // stage("Prod E2E") {
+      //   agent {
+      //     docker {
+      //       image "mcr.microsoft.com/playwright:v1.39.0-jammy"
+      //       reuseNode true
+      //     }
+      //   }
+
+      //   environment {
+      //     CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
+      //   }
+
+      //   steps {
+      //     sh """
+      //       npx playwright test  --reporter=html
+      //     """
+      //   }
+
+      //   post {
+      //     always {
+      //       publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Playwright E2E", reportTitles: "", useWrapperFileDirectly: true])
+      //     }
+      //   }
+      // }
 
       stage("Prod E2E") {
         agent {
@@ -119,22 +164,29 @@
             reuseNode true
           }
         }
-
-        environment {
-          CI_ENVIRONMENT_URL = "https://admirable-jalebi-b289f9.netlify.app"
-        }
-
         steps {
           sh """
-            npx playwright test  --reporter=html
+            STAGING_URL=\$(cat staging_url.txt)
+            echo "Running Playwright E2E tests against: \$STAGING_URL"
+            
+            PLAYWRIGHT_TEST_BASE_URL=\$STAGING_URL npx playwright test --reporter=html
           """
         }
-
         post {
           always {
-            publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: "playwright-report", reportFiles: "index.html", reportName: "Playwright E2E", reportTitles: "", useWrapperFileDirectly: true])
+            publishHTML([
+              allowMissing: false,
+              alwaysLinkToLastBuild: false,
+              keepAll: false,
+              reportDir: "playwright-report",
+              reportFiles: "index.html",
+              reportName: "Playwright E2E",
+              reportTitles: "",
+              useWrapperFileDirectly: true
+            ])
           }
         }
       }
+
     }
   }
